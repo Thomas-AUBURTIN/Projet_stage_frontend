@@ -1,6 +1,4 @@
 import streamlit as st
-import os
-import json
 import Proxy.proxy as pr
 
 left, center, right = st.columns([1, 50, 1])
@@ -21,14 +19,19 @@ if prompt := st.chat_input("quelle est votre question"):
         "content": prompt
     })
 
-    reponse  =  pr.post_question(prompt)
+    reponse = pr.ask_api(prompt)
     reponse_json = reponse.json()
 
-    with st.chat_message("assistant"):
-        st.markdown(reponse_json["reponse"])
 
-        st.session_state.messages_recent.append({
+    if isinstance(reponse_json, dict):
+        assistant_text = reponse_json.get("reponse", str(reponse_json))
+    else:
+        assistant_text = str(reponse_json)
+
+    with st.chat_message("assistant"):
+        st.markdown(assistant_text)
+
+    st.session_state.messages_recent.append({
         "role": "assistant",
-        "content": reponse_json["reponse"]
+        "content": assistant_text
     })
-    
